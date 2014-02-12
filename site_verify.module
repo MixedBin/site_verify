@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * Used to demonstrate the possibilities of routing in Drupal 8.
+ */
+
+/**
+ * Implements hook_menu_link_defaults().
+ */
+function site_verify_menu_link_defaults() {
+  $items['admin.config.search.verify'] = array(
+    'link_title' => 'Site Verifications',
+    'description' => 'Verify ownership of the website for use with search engines.',
+    'route_name' => 'site_verify.verifications_list',
+    'parent' => 'system.admin.config.search',
+  );
+
+  return $items;
+}
+
+/**
+ * Fetch an array of supported search engines.
+ */
+function site_verify_get_engines() {
+  static $engines;
+
+  if (!isset($engines)) {
+    // Fetch the list of engines and allow other modules to alter it.
+    $engines = module_invoke_all('site_verify_engine_info');
+    drupal_alter('site_verify_engine', $engines);
+
+    // Merge the default values for each engine entry.
+    foreach ($engines as $key => $engine) {
+      $engines[$key] += array(
+        'key' => $key,
+        //'name' => drupal_ucfirst($engine),
+        'file' => FALSE,
+        'file_example' => FALSE,
+        'file_validate' => array(),
+        'file_contents' => FALSE,
+        'file_contents_example' => FALSE,
+        'file_contents_validate' => array(),
+        'meta' => FALSE,
+        'meta_example' => FALSE,
+        'meta_validate' => array(),
+      );
+    }
+  }
+
+  return $engines;
+}
