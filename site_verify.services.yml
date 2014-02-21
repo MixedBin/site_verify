@@ -1,0 +1,5 @@
+services:
+  site_verify_event_subscriber:
+    class: Drupal\site_verify\EventSubscriber\SiteVerifySubscriber
+    tags:
+      - {name: event_subscriber}
