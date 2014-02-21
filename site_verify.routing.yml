@@ -23,6 +23,14 @@ site_verify.verification_edit:
   requirements:
     _permission: 'administer site configuration'
 
+site_verify.verification_delete:
+  path: '/admin/config/search/verifications/{site_verify}/delete'
+  defaults:
+    _form: '\Drupal\site_verify\Form\SiteVerifyDeleteForm'
+    _title: 'Delete verification'
+  requirements:
+    _permission: 'administer site configuration'
+
 site_verify.verification_add_engine:
   path: '/admin/config/search/verifications/add/{site_verify_engine}'
   defaults:
