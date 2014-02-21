@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\site_verify\Form\SiteVerifyEditForm.
+ * Contains \Drupal\site_verify\Form\SiteVerifyAdminForm.
  */
 
 namespace Drupal\site_verify\Form;
@@ -17,19 +17,22 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 /**
  * Configure cron settings for this site.
  */
-class SiteVerifyEditForm extends ConfigFormBase {
+class SiteVerifyAdminForm extends ConfigFormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'site_verify_edit';
+    return 'site_verify_admin';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $record = array(), $engine = NULL) {
+  public function buildForm(array $form, array &$form_state, $record = array(), $engine = NULL, $site_verify = NULL) {
+    if (!empty($site_verify)) {
+      $record = site_verify_load($site_verify);
+    }
     if (!isset($form_state['storage']['step'])) {
       $record += array(
         'svid' => NULL,
@@ -46,7 +49,6 @@ class SiteVerifyEditForm extends ConfigFormBase {
     }
 
     $form['actions'] = array('#type' => 'actions');
-
     switch ($form_state['storage']['step']) {
       case 1:
         $engines = site_verify_get_engines();
@@ -60,10 +62,6 @@ class SiteVerifyEditForm extends ConfigFormBase {
           '#type' => 'select',
           '#title' => t('Search engine'),
           '#options' => $options,
-        );
-        $form['actions']['next'] = array(
-          '#type' => 'submit',
-          '#value' => t('Next'),
         );
         break;
 
@@ -79,7 +77,7 @@ class SiteVerifyEditForm extends ConfigFormBase {
         $form['engine_name'] = array(
           '#type' => 'item',
           '#title' => t('Search engine'),
-          '#value' => $record['engine']['name'],
+          '#markup' => $record['engine']['name'],
         );
         $form['#engine'] = $record['engine'];
 
@@ -115,7 +113,16 @@ class SiteVerifyEditForm extends ConfigFormBase {
           '#wysiwyg' => FALSE,
           '#access' => $record['engine']['file_contents'],
         );
-        if (!variable_get('clean_url', 0)) {
+
+        // Assume clean URLs unless the request tells us otherwise.
+        $clean_urls = TRUE;
+        try {
+          $request = \Drupal::request();
+          $clean_urls = $request->attributes->get('clean_urls');
+        }
+        catch (ServiceNotFoundException $e) {
+        }
+        if ($clean_urls == FALSE) {
           drupal_set_message(t('Using verification files will not work if <a href="@clean-urls">clean URLs</a> are disabled.', array('@clean-urls' => url('admin/settings/clean-url'))), 'error', FALSE);
           $form['file']['#disabled'] = TRUE;
           $form['file_contents']['#disabled'] = TRUE;
@@ -123,15 +130,9 @@ class SiteVerifyEditForm extends ConfigFormBase {
         }
 
         if ($record['engine']['file']) {
-          $form['#validate'][] = 'site_verify_validate_file';
+          //$form['#validate'][] = 'site_verify_validate_file';
           $form['#attributes'] = array('enctype' => 'multipart/form-data');
         }
-
-        $form['actions']['submit'] = array(
-          '#type' => 'submit',
-          '#value' => t('Save'),
-          '#weight' => 10,
-        );
         break;
     }
 
@@ -143,5 +144,44 @@ class SiteVerifyEditForm extends ConfigFormBase {
     );
 
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, array &$form_state) {
+    if ($form_state['storage']['record']['engine']['file']) {
+      //site_verify_validate_file
+
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, array &$form_state) {
+    if ($form_state['storage']['step'] == 1) {
+      // Send the form to step 2 (verification details).
+      $form_state['storage']['record']['engine'] = site_verify_engine_load($form_state['values']['engine']);
+      $form_state['storage']['step']++;
+      $form_state['rebuild'] = TRUE;
+    }
+    else {
+      // Save the verification to the database.
+      if ($form_state['values']['svid']) {
+        drupal_write_record('site_verify', $form_state['values'], array('svid'));
+      }
+      else {
+        drupal_write_record('site_verify', $form_state['values']);
+      }
+
+      drupal_set_message(t('Verification saved.'));
+      $form_state['storage'] = $form_state['rebuild'] = NULL;
+      $form_state['redirect'] = 'admin/config/search/verifications';
+
+      // Clear front page caches and set the menu to be rebuilt.
+      cache()->deleteTags(array('cache_page'));
+      \Drupal::service('router.builder')->setRebuildNeeded();
+    }
   }
 }

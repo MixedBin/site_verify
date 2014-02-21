@@ -9,39 +9,13 @@ namespace Drupal\site_verify\Controller;
 
 use Drupal\Component\Utility\Settings;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Database\Connection;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns responses for Site Verify module routes.
  */
 class SiteVerifyController extends ControllerBase {
-
-  /**
-   * The database service.
-   *
-   * @var \Drupal\Core\Database\Connection
-   */
-  protected $database;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('database')
-    );
-  }
-
-  /**
-   * Constructs a SiteVerifyController object.
-   *
-   * @param \Drupal\Core\Database\Connection $database
-   *   A database connection.
-   */
-  public function __construct(Connection $database) {
-    $this->database = $database;
-  }
 
   /**
    * Controller content callback: Verifications List page.
@@ -65,13 +39,8 @@ class SiteVerifyController extends ControllerBase {
       array('data' => t('Operations')),
     );
 
-    $query = $this->database->select('site_verify', 'sv');
-    $query->fields('sv');
-    // $query->extend('\Drupal\Core\Database\Query\TableSortExtender');
-    // $query->extend('\Drupal\Core\Database\Query\PagerSelectExtender');
-    $verifications = $query
-      // ->orderByHeader($header)
-      // ->limit(50)
+    $verifications = db_select('site_verify', 'sv')
+      ->fields('sv')
       ->execute();
 
     $rows = array();
@@ -109,6 +78,27 @@ class SiteVerifyController extends ControllerBase {
     );
     // $build['verification_pager'] = array('#theme' => 'pager');
     return $build;
+  }
+
+  /**
+   * Controller content callback: Verifications File content.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response containing the Verification File content.
+   */
+  public function verificationsFileContent($svid) {
+    $verification = site_verify_load($svid);
+    if ($verification['file_contents'] && $verification['engine']['file_contents']) {
+      $response = new Response();
+      $response->setContent($verification['file_contents']);
+      return $response;
+    }
+    else {
+      drupal_set_title(t('Verification page'));
+      return t('This is a verification page for the @title search engine.', array(
+        '!title' => $verification['engine']['name'],
+      ));
+    }
   }
 
 }
