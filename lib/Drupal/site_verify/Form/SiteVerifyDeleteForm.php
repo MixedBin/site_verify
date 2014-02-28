@@ -38,6 +38,9 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelRoute() {
+    return array(
+      'route_name' => 'site_verify.verifications_list',
+    );
   }
 
   /**
@@ -62,8 +65,6 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
       '#value' => $record,
     );
 
-    // @todo Convert to getCancelRoute() after http://drupal.org/node/1974210.
-    $form['actions']['cancel']['#href'] = 'admin/config/search/verifications';
     return $form;
   }
 
@@ -83,8 +84,7 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
     ), WATCHDOG_NOTICE);
     $form_state['redirect_route']['route_name'] = 'site_verify.verifications_list';
 
-    // Clear front page caches and set the menu to be rebuilt.
-    cache()->deleteTags(array('cache_page'));
+    // Set the menu to be rebuilt.
     \Drupal::service('router.builder')->setRebuildNeeded();
   }
 
