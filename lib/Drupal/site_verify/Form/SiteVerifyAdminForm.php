@@ -89,6 +89,9 @@ class SiteVerifyAdminForm extends ConfigFormBase {
           '#element_validate' => $record['engine']['meta_validate'],
           '#access' => $record['engine']['meta'],
           '#maxlength' => NULL,
+          '#attributes' => array(
+            'placeholder' => $record['engine']['meta_example'],
+          ),
         );
 
         $form['file_upload'] = array(
@@ -97,6 +100,7 @@ class SiteVerifyAdminForm extends ConfigFormBase {
           '#description' => t('If you have been provided with an actual file, you can simply upload the file.'),
           '#access' => $record['engine']['file'],
         );
+
         $form['file'] = array(
           '#type' => 'textfield',
           '#title' => t('Verification file'),
@@ -104,14 +108,18 @@ class SiteVerifyAdminForm extends ConfigFormBase {
           '#description' => t('The name of the HTML verification file you were asked to upload.'),
           '#element_validate' => $record['engine']['file_validate'],
           '#access' => $record['engine']['file'],
+          '#attributes' => array(
+            'placeholder' => $record['engine']['file_example'],
+          ),
         );
+
         $form['file_contents'] = array(
           '#type' => 'textarea',
           '#title' => t('Verification file contents'),
           '#default_value' => $record['file_contents'],
           '#element_validate' => $record['engine']['file_contents_validate'],
           '#wysiwyg' => FALSE,
-          '#access' => $record['engine']['file_contents'],
+          '#access' => $record['file_contents'],
         );
 
         // Assume clean URLs unless the request tells us otherwise.
@@ -179,8 +187,7 @@ class SiteVerifyAdminForm extends ConfigFormBase {
       $form_state['storage'] = $form_state['rebuild'] = NULL;
       $form_state['redirect'] = 'admin/config/search/verifications';
 
-      // Clear front page caches and set the menu to be rebuilt.
-      cache()->deleteTags(array('cache_page'));
+      // Set the menu to be rebuilt.
       \Drupal::service('router.builder')->setRebuildNeeded();
     }
   }
