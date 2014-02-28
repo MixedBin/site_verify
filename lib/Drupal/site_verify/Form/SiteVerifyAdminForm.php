@@ -138,7 +138,6 @@ class SiteVerifyAdminForm extends ConfigFormBase {
         }
 
         if ($record['engine']['file']) {
-          //$form['#validate'][] = 'site_verify_validate_file';
           $form['#attributes'] = array('enctype' => 'multipart/form-data');
         }
         break;
@@ -159,8 +158,31 @@ class SiteVerifyAdminForm extends ConfigFormBase {
    */
   public function validateForm(array &$form, array &$form_state) {
     if ($form_state['storage']['record']['engine']['file']) {
-      //site_verify_validate_file
+      $values = &$form_state['values'];
 
+      // Import the uploaded verification file.
+      $validators = array('file_validate_extensions' => array());
+      if ($file = file_save_upload('file_upload', $form_state, $validators, FALSE, 0, FILE_EXISTS_REPLACE)) {
+        $contents = @file_get_contents($file->getFileUri());
+
+        $file->delete();
+        if ($contents === FALSE) {
+          drupal_set_message(t('The verification file import failed, because the file %filename could not be read.', array('%filename' => $file->getFilename())), 'error');
+        }
+        else {
+          $values['file'] = $file->getFilename();
+          $values['file_contents'] = $contents;
+        }
+      }
+
+      if ($values['file']) {
+        $existing_file = db_query("SELECT svid FROM {site_verify} WHERE LOWER(file) = LOWER(:file)", array(
+          ':file' => $values['file'],
+        ))->fetchField();
+        if ($existing_file) {
+          $this->setFormError('file', $form_state, $this->t('The file %filename is already being used in another verification.', array('%filename' => $values['file'])));
+        }
+      }
     }
   }
 
