@@ -18,7 +18,7 @@ class SiteVerifySubscriber implements EventSubscriberInterface {
    * Add the verification meta tags to the front page.
    */
   public function checkForMetatag(GetResponseEvent $event) {
-    if (drupal_is_front_page()) {
+    if (\Drupal::service('path.matcher')->isFrontPage()) {
       $meta_tags = db_select('site_verify', 'site_verify')
         ->fields('site_verify', array('svid', 'meta'))
         ->condition('meta', '', '<>')
