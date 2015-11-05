@@ -101,8 +101,8 @@ function site_verify_get_engines() {
 
   if (!isset($engines)) {
     // Fetch the list of engines and allow other modules to alter it.
-    $engines = module_invoke_all('site_verify_engine_info');
-    drupal_alter('site_verify_engine', $engines);
+    $engines = \Drupal::moduleHandler()->invokeAll('site_verify_engine_info');
+    \Drupal::moduleHandler()->alter('site_verify_engine', $engines);
     // Merge the default values for each engine entry.
     foreach ($engines as $key => $engine) {
       $engines[$key] += array(
