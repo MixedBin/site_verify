@@ -74,7 +74,7 @@ class SiteVerifyController extends ControllerBase {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
-      '#empty' => t('No verifications available. <a href="@add">Add verification</a>.', array('@add' => url('admin/config/search/verifications/add'))),
+      '#empty' => t('No verifications available. <a href="@add">Add verification</a>.', array('@add' => \Drupal::url('site_verify.verification_add'))),
     );
     // $build['verification_pager'] = array('#theme' => 'pager');
     return $build;
