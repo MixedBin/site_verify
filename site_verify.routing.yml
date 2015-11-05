@@ -2,7 +2,7 @@
 site_verify.verifications_list:
   path: '/admin/config/search/verifications'
   defaults:
-    _content: '\Drupal\site_verify\Controller\SiteVerifyController::verificationsListPage'
+    _controller: '\Drupal\site_verify\Controller\SiteVerifyController::verificationsListPage'
     _title: 'Verifications'
   requirements:
     _permission: 'administer site configuration'
