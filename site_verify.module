@@ -5,6 +5,8 @@
  * Used to demonstrate the possibilities of routing in Drupal 8.
  */
 
+use \Drupal\Component\Utility\Unicode;
+
 /**
  * Implements hook_menu_link_defaults().
  */
@@ -107,7 +109,7 @@ function site_verify_get_engines() {
     foreach ($engines as $key => $engine) {
       $engines[$key] += array(
         'key' => $key,
-        //'name' => drupal_ucfirst($engine),
+        'name' => Unicode::ucfirst($engine->name),
         'file' => FALSE,
         'file_example' => FALSE,
         'file_validate' => array(),
@@ -122,4 +124,32 @@ function site_verify_get_engines() {
   }
 
   return $engines;
+}
+
+/**
+ * Implements hook_page_attachments().
+ * Add a meta tag to the HEAD.
+ */
+function site_verify_page_attachments(array &$page) {
+  $meta_tags = db_select('site_verify', 'site_verify')
+    ->fields('site_verify', array('svid', 'meta'))
+    ->condition('meta', '', '<>')
+    ->execute()
+    ->fetchAllKeyed();
+
+  foreach ($meta_tags as $svid => $meta_tag) {
+    preg_match('/name="(.*)" content/', $meta_tag, $name);
+    preg_match('/content="(.*)"/', $meta_tag, $content);
+
+    $data = array(
+      '#type' => 'html_tag',
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'name' => $name[1],
+        'content' => $content[1],
+      ));
+
+    $page['#attached']['html_head'][] = array($data, 'site_verify:' . $svid);
+  }
+
 }
