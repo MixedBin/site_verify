@@ -5,10 +5,11 @@
  * Contains \Drupal\site_verify\Form\SiteVerifyDeleteForm.
  */
 
-
 namespace Drupal\site_verify\Form;
 
 use Drupal\Core\Form\ConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Builds the form to delete a forum term.
@@ -16,6 +17,13 @@ use Drupal\Core\Form\ConfirmFormBase;
 class SiteVerifyDeleteForm extends ConfirmFormBase {
 
   protected $site_verify = NULL;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return ['site_verify.settings'];
+  }
 
   /**
    * {@inheritdoc}
@@ -37,10 +45,8 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelRoute() {
-    return array(
-      'route_name' => 'site_verify.verifications_list',
-    );
+  public function getCancelUrl() {
+    return Url::fromRoute('site_verify.verifications_list');
   }
 
   /**
@@ -53,7 +59,7 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $site_verify = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $site_verify = NULL) {
 
     $this->site_verify = $site_verify;
     $record = site_verify_load($this->site_verify);
@@ -71,18 +77,17 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
-    $record = $form_state['values']['record'];
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $record = $form_state->getValue('record');
     db_delete('site_verify')
       ->condition('svid', $record['svid'])
       ->execute();
     drupal_set_message(t('Verification for %engine has been deleted.', array(
       '%engine' => $record['engine']['name'],
     )));
-    watchdog('site_verify', 'Verification for %engine deleted.', array(
-      '%engine' => $record['engine']['name'],
-    ), WATCHDOG_NOTICE);
-    $form_state['redirect_route']['route_name'] = 'site_verify.verifications_list';
+    \Drupal::logger('site_verify')->notice(t('Verification for %engine deleted.', array(
+      '%engine' => $record['engine']['name'])));
+    $form_state->setRedirect('site_verify.verifications_list');
 
     // Set the menu to be rebuilt.
     \Drupal::service('router.builder')->setRebuildNeeded();
