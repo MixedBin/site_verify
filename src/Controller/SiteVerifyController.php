@@ -7,10 +7,11 @@
 
 namespace Drupal\site_verify\Controller;
 
-use Drupal\Component\Utility\Settings;
+use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns responses for Site Verify module routes.
@@ -29,8 +30,10 @@ class SiteVerifyController extends ControllerBase {
     //   '#markup' => $this->t('TODO: show list of verifications.'),
     // );
 
+    \Drupal::service('router.builder')->setRebuildNeeded();
+
     $engines = site_verify_get_engines();
-    $destination = drupal_get_destination();
+    $destination = \Drupal::destination()->getAsArray();
 
     $header = array(
       array('data' => t('Engine'), 'field' => 'engine'),
@@ -47,17 +50,17 @@ class SiteVerifyController extends ControllerBase {
     foreach ($verifications as $verification) {
       $row = array('data' => array());
       $row['data'][] = $engines[$verification->engine]['name'];
-      $row['data'][] = $verification->meta ? '<span title="' . check_plain(truncate_utf8($verification->meta, 48)) . '">' . t('Yes') . '</spam>' : t('No');
-      $row['data'][] = $verification->file ? l($verification->file, $verification->file) : t('None');
+      $row['data'][] = $verification->meta ? '<span title="' . Html::escape(Unicode::truncate($verification->meta, 48)) . '">' . t('Yes') . '</span>' : t('No');
+      $row['data'][] = $verification->file ? \Drupal::l($verification->file, Url::fromRoute('site_verify.' . $verification->file)) : t('None');
       $operations = array();
       $operations['edit'] = array(
         'title' => t('Edit'),
-        'href' => "admin/config/search/verifications/{$verification->svid}/edit",
+        'url' => Url::fromRoute('site_verify.verification_edit', array('site_verify' => $verification->svid)),
         'query' => $destination,
       );
       $operations['delete'] = array(
         'title' => t('Delete'),
-        'href' => "admin/config/search/verifications/{$verification->svid}/delete",
+        'url' => Url::fromRoute('site_verify.verification_delete', array('site_verify' => $verification->svid)),
         'query' => $destination,
       );
       $row['data']['operations'] = array(
@@ -94,10 +97,13 @@ class SiteVerifyController extends ControllerBase {
       return $response;
     }
     else {
-      drupal_set_title(t('Verification page'));
-      return t('This is a verification page for the @title search engine.', array(
+      $build = array();
+      $build['#title'] = $this->t('Verification page');
+      $build['#markup'] = $this->t('This is a verification page for the !title search engine.', array(
         '!title' => $verification['engine']['name'],
       ));
+
+      return $build;
     }
   }
 
