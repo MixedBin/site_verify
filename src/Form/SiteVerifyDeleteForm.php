@@ -16,7 +16,7 @@ use Drupal\Core\Url;
  */
 class SiteVerifyDeleteForm extends ConfirmFormBase {
 
-  protected $site_verify = NULL;
+  protected $siteVerify = NULL;
 
   /**
    * {@inheritdoc}
@@ -86,7 +86,8 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
       '%engine' => $record['engine']['name'],
     )));
     \Drupal::logger('site_verify')->notice(t('Verification for %engine deleted.', array(
-      '%engine' => $record['engine']['name'])));
+      '%engine' => $record['engine']['name'],
+    )));
     $form_state->setRedirect('site_verify.verifications_list');
 
     // Set the menu to be rebuilt.

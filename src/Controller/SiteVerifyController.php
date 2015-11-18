@@ -25,11 +25,9 @@ class SiteVerifyController extends ControllerBase {
    *   Render Array
    */
   public function verificationsListPage() {
-
     // $build['verifications_list'] = array(
-    //   '#markup' => $this->t('TODO: show list of verifications.'),
+    // '#markup' => $this->t('TODO: show list of verifications.'),
     // );
-
     \Drupal::service('router.builder')->setRebuildNeeded();
 
     $engines = site_verify_get_engines();

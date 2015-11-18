@@ -47,7 +47,7 @@ class SiteVerifyAdminForm extends ConfigFormBase {
         'meta' => '',
         'engine' => $engine,
       );
-      !empty($record['engine']) ? $form_state->setStorage(array('step' => 2, 'record' => $record,)) : $form_state->setStorage(array('step' => 1, 'record' => $record,));
+      !empty($record['engine']) ? $form_state->setStorage(array('step' => 2, 'record' => $record)) : $form_state->setStorage(array('step' => 1, 'record' => $record));
     }
     else {
       $record = $storage['record'];
@@ -217,4 +217,5 @@ class SiteVerifyAdminForm extends ConfigFormBase {
       \Drupal::service('router.builder')->setRebuildNeeded();
     }
   }
+
 }

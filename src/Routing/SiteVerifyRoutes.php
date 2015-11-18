@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\site_verify\Routing;
+
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -36,4 +37,5 @@ class SiteVerifyRoutes {
     }
     return $route_collection;
   }
+
 }

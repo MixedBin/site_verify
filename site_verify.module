@@ -8,26 +8,14 @@
 use \Drupal\Component\Utility\Unicode;
 
 /**
- * Implements hook_menu_link_defaults().
- */
-function site_verify_menu_link_defaults() {
-  $items['admin.config.search.verify'] = array(
-    'link_title' => 'Site Verifications',
-    'description' => 'Verify ownership of the website for use with search engines.',
-    'route_name' => 'site_verify.verifications_list',
-    'parent' => 'system.admin.config.search',
-  );
-  return $items;
-}
-
-/**
  * Menu load callback; loads a site verification record.
  *
  * This also loads the engine details if the record was found.
  *
- * @param $svid
+ * @param int $svid
  *   A site verification ID.
- * @return
+ *
+ * @return array
  *   An array of the site verification record, or FALSE if not found.
  */
 function site_verify_load($svid) {
@@ -45,9 +33,10 @@ function site_verify_load($svid) {
 /**
  * Menu load callback; loads engine details.
  *
- * @param $engine
+ * @param string $engine
  *   A string with the engine shortname.
- * @return
+ *
+ * @return array
  *   An arary of the engine details, or FALSE if not found.
  */
 function site_verify_engine_load($engine) {
@@ -128,6 +117,7 @@ function site_verify_get_engines() {
 
 /**
  * Implements hook_page_attachments().
+ *
  * Add a meta tag to the HEAD.
  */
 function site_verify_page_attachments(array &$page) {
@@ -148,7 +138,8 @@ function site_verify_page_attachments(array &$page) {
         '#attributes' => array(
           'name' => $name[1],
           'content' => $content[1],
-        ));
+        ),
+      );
 
       $page['#attached']['html_head'][] = array($data, 'site_verify:' . $svid);
     }
