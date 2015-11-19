@@ -8,8 +8,10 @@
 namespace Drupal\site_verify\Controller;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\Element\HtmlTag;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -48,7 +50,7 @@ class SiteVerifyController extends ControllerBase {
     foreach ($verifications as $verification) {
       $row = array('data' => array());
       $row['data'][] = $engines[$verification->engine]['name'];
-      $row['data'][] = $verification->meta ? '<span title="' . Html::escape(Unicode::truncate($verification->meta, 48)) . '">' . t('Yes') . '</span>' : t('No');
+      $row['data'][] = $verification->meta ? t('Yes') : t('No');
       $row['data'][] = $verification->file ? \Drupal::l($verification->file, Url::fromRoute('site_verify.' . $verification->file)) : t('None');
       $operations = array();
       $operations['edit'] = array(
