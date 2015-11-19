@@ -35,7 +35,7 @@ class SiteVerifyAdminForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $record = array(), $engine = NULL, $site_verify = NULL) {
     if (!empty($site_verify)) {
-      $record = site_verify_load($site_verify);
+      $record = \Drupal::service('site_verify_service')->siteVerifyLoad($site_verify);
     }
 
     $storage = $form_state->getStorage();
@@ -58,7 +58,7 @@ class SiteVerifyAdminForm extends ConfigFormBase {
     $storage = $form_state->getStorage();
     switch ($storage['step']) {
       case 1:
-        $engines = site_verify_get_engines();
+        $engines = \Drupal::service('site_verify_service')->siteVerifyGetEngines();
         $options = array();
         foreach ($engines as $key => $engine) {
           $options[$key] = $engine['name'];
@@ -189,7 +189,7 @@ class SiteVerifyAdminForm extends ConfigFormBase {
       // Send the form to step 2 (verification details).
       $form_state->setStorage(array(
         'record' => array(
-          'engine' => site_verify_engine_load($form_state->getValue('engine')),
+          'engine' => \Drupal::service('site_verify_service')->siteVerifyEngineLoad($form_state->getValue('engine')),
         ),
         'step' => 2,
       ));

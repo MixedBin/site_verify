@@ -36,8 +36,8 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    if (!empty($this->site_verify)) {
-      $record = site_verify_load($this->site_verify);
+    if (!empty($this->siteVerify)) {
+      $record = \Drupal::service('site_verify_service')->siteVerifyLoad($this->siteVerify);
       return $this->t('Are you sure you want to delete the site verification %label?', array('%label' => $record['engine']['name']));
     }
   }
@@ -61,8 +61,8 @@ class SiteVerifyDeleteForm extends ConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $site_verify = NULL) {
 
-    $this->site_verify = $site_verify;
-    $record = site_verify_load($this->site_verify);
+    $this->siteVerify = $site_verify;
+    $record = \Drupal::service('site_verify_service')->siteVerifyLoad($this->siteVerify);
 
     $form = parent::buildForm($form, $form_state);
 

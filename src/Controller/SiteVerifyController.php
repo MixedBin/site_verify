@@ -28,9 +28,9 @@ class SiteVerifyController extends ControllerBase {
     // $build['verifications_list'] = array(
     // '#markup' => $this->t('TODO: show list of verifications.'),
     // );
-    \Drupal::service('router.builder')->setRebuildNeeded();
+    \Drupal::service('router.builder')->rebuild();
 
-    $engines = site_verify_get_engines();
+    $engines = \Drupal::service('site_verify_service')->siteVerifyGetEngines();
     $destination = \Drupal::destination()->getAsArray();
 
     $header = array(
@@ -88,7 +88,7 @@ class SiteVerifyController extends ControllerBase {
    *   The response containing the Verification File content.
    */
   public function verificationsFileContent($svid) {
-    $verification = site_verify_load($svid);
+    $verification = \Drupal::service('site_verify_service')->siteVerifyLoad($svid);
     if ($verification['file_contents'] && $verification['engine']['file_contents']) {
       $response = new Response();
       $response->setContent($verification['file_contents']);
