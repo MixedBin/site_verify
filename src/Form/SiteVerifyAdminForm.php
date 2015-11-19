@@ -150,8 +150,16 @@ class SiteVerifyAdminForm extends ConfigFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $storage = $form_state->getStorage();
+    $values = &$form_state->getValues();
+
+    // Check META tag.
+    $form_state->setValue('meta', trim($values['meta']));
+    if ($values['meta'] != '' && !preg_match('/<meta (.*)>/', $values['meta'])) {
+      $form_state->setErrorByName('meta', $this->t('Only META tags are supported at this moment'));
+    }
+
+    // Check verification file.
     if ($storage['record']['engine']['file']) {
-      $values = &$form_state->getValues();
 
       // Import the uploaded verification file.
       $validators = array('file_validate_extensions' => array());
